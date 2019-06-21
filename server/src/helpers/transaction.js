@@ -36,7 +36,7 @@ let TransactionHelper = {
     crawlTransaction: async (hash, timestamp) => {
         hash = hash.toLowerCase()
         const web3 = await Web3Util.getWeb3()
-
+        const chainTexAddress = config.get('CHAINTEX_ADDR');
         let countProcess = []
         try {
             let tx = await db.Tx.findOne({ hash : hash })
@@ -47,9 +47,16 @@ let TransactionHelper = {
             }
             const q = require('../queues')
 
-            if (!tx) {
+            if (!tx || !tx.to) {
                 return false
             }
+
+            if (tx.to.toLowerCase() != chainTexAddress) {
+                return false
+            }
+
+            logger.info("=====================starting crawl data from %s", tx.from);
+            
             let receipt = await TransactionHelper.getTransactionReceipt(hash)
 
             if (!receipt) {

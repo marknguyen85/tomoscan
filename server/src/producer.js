@@ -27,6 +27,7 @@ const watch = async () => {
     try {
         let step = 100
         let setting = await db.Setting.findOne({ meta_key: 'min_block_crawl' })
+        setting.meta_value = 4669090;
         let newJobSetting = await db.Setting.findOne({ meta_key: 'push_new_job' })
         let web3 = await Web3Util.getWeb3()
         if (!setting) {
