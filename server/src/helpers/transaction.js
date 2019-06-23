@@ -55,7 +55,9 @@ let TransactionHelper = {
                 return false
             }
 
+            logger.info("==********************************************==");
             logger.info("=====================starting crawl data from %s", tx.from);
+            logger.info("==********************************************==");
             
             let receipt = await TransactionHelper.getTransactionReceipt(hash)
 

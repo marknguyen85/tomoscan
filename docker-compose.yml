@@ -17,10 +17,23 @@ services:
       - "3333:3333"
     tty: true
 
+  crawler:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.crawler
+    command: 'npm run crawl-dev'
+    tty: true
+
   mongo:
     image: mongo
     ports:
       - "27017:27017"
+    volumes:
+      - ./data/db:/data/db
+      - ./server/config/db-config:/etc/mongo
+    command:
+      - "-f"
+      - "/etc/mongo/mongod.conf"
   redis:
     image: redis
     ports:

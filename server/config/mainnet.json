@@ -10,7 +10,8 @@
     "password": null,
     "prefix": "TomoScan"
   },
-
+  "CHAINTEX_ADDR": "0x00252a171ee0ea54bfcf326c8cf86fd970205df0",
+  "INIT_BLOCK_CRAWLER": 4669090,
   "defaultCandidate": [
     {
       "name": "TomoChain01",

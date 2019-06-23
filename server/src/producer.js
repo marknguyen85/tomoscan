@@ -5,6 +5,7 @@ const q = require('./queues')
 const db = require('./models')
 const events = require('events')
 const logger = require('./helpers/logger')
+const config = require('config')
 
 // fix warning max listener
 events.EventEmitter.defaultMaxListeners = 1000
@@ -27,13 +28,19 @@ const watch = async () => {
     try {
         let step = 100
         let setting = await db.Setting.findOne({ meta_key: 'min_block_crawl' })
-        setting.meta_value = 4669090;
         let newJobSetting = await db.Setting.findOne({ meta_key: 'push_new_job' })
+        let initBlockCrawl = config.get('INIT_BLOCK_CRAWLER');
+        if (!initBlockCrawl) {
+            initBlockCrawl = parseInt(+initBlockCrawl);
+        } else {
+            initBlockCrawl = 0;
+        }
+
         let web3 = await Web3Util.getWeb3()
         if (!setting) {
             setting = await new db.Setting({
                 meta_key: 'min_block_crawl',
-                meta_value: 0
+                meta_value: initBlockCrawl
             })
         }
         if (!newJobSetting) {
