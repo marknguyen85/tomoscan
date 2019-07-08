@@ -13,6 +13,8 @@ const Tx = new Schema({
     from: { type: String, index: true },
     to: { type: String, index: true },
     value: String,
+    realValue: String,
+    internalValue: String,
     gas: Number,
     gasPrice: String,
     input: String,

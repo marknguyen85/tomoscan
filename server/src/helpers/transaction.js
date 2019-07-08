@@ -36,7 +36,7 @@ let TransactionHelper = {
     crawlTransaction: async (hash, timestamp) => {
         hash = hash.toLowerCase()
         const web3 = await Web3Util.getWeb3()
-        const chainTexAddress = config.get('CHAINTEX_ADDR');
+        const chainTexAddress = config.get('CHAINTEX_ADDR')
         let countProcess = []
         try {
             let tx = await db.Tx.findOne({ hash : hash })
@@ -51,14 +51,10 @@ let TransactionHelper = {
                 return false
             }
 
-            if (tx.to.toLowerCase() != chainTexAddress) {
+            if (tx.to.toLowerCase() !== chainTexAddress) {
                 return false
             }
 
-            logger.info("==********************************************==");
-            logger.info("=====================starting crawl data from %s", tx.from);
-            logger.info("==********************************************==");
-            
             let receipt = await TransactionHelper.getTransactionReceipt(hash)
 
             if (!receipt) {
@@ -192,10 +188,14 @@ let TransactionHelper = {
                 internalCount.push({ hash: item.to, countType: 'internalTx' })
             }
             if (internalCount.length > 0) {
+                // get value from internal tx
+                tx.internalValue = internalCount[0].value
                 q.create('CountProcess', { data: JSON.stringify(internalCount) })
                     .priority('low').removeOnComplete(true)
                     .attempts(5).backoff({ delay: 2000, type: 'fixed' }).save()
+                
             }
+            tx.realValue = tx.value !== '0' ? tx.value : tx.internalValue
 
             await db.Tx.updateOne({ hash: hash }, tx,
                 { upsert: true, new: true })
@@ -348,9 +348,12 @@ let TransactionHelper = {
         // Internal transaction
         let internalTx = await TransactionHelper.getInternalTx(tx)
         tx.i_tx = internalTx.length
-
+        if (internalTx.length > 0) {
+            tx.internalValue = internalTx[0].value
+        }
         delete tx['_id']
 
+        tx.realValue = tx.value !== '0' ? tx.value : tx.internalValue
         return db.Tx.findOneAndUpdate({ hash: hash }, tx,
             { upsert: true, new: true })
     },
