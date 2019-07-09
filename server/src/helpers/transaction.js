@@ -195,7 +195,12 @@ let TransactionHelper = {
                     .attempts(5).backoff({ delay: 2000, type: 'fixed' })
                     .save()
             }
-            tx.realValue = !isNaN(tx.value) && tx.value !== '0' ? +tx.value : +tx.internalValue
+
+            if (!isNaN(tx.value) && tx.value !== '0') {
+                tx.realValue = +tx.value
+            } else {
+                tx.realValue = +tx.internalValue
+            }
 
             await db.Tx.updateOne({ hash: hash }, tx,
                 { upsert: true, new: true })
@@ -353,7 +358,12 @@ let TransactionHelper = {
         }
         delete tx['_id']
 
-        tx.realValue = !isNaN(tx.value) && tx.value !== '0' ? +tx.value : +tx.internalValue
+        if (!isNaN(tx.value) && tx.value !== '0') {
+            tx.realValue = +tx.value
+        } else {
+            tx.realValue = +tx.internalValue
+        }
+        
         return db.Tx.findOneAndUpdate({ hash: hash }, tx,
             { upsert: true, new: true })
     },
