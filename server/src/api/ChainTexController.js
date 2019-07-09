@@ -29,6 +29,73 @@ ChainTexController.get('/chaintex/vol24h', async (req, res) => {
     return res.json({ circulatingSupply: circulatingNumber.toNumber(), maxSupply: maxSupply })
 })
 
+ChainTexController.get('/chaintex/conststats', [
+    check('limit').optional().isInt({ max: 100 }).withMessage('Limit is less than 101 items per page'),
+    check('page').optional().isInt({ max: 500 }).withMessage('Require page is number')
+], async (req, res) => {
+    let errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
+
+    try {
+        let perPage = !isNaN(req.query.limit) ? parseInt(req.query.limit) : 25
+        let page = !isNaN(req.query.page) ? parseInt(req.query.page) : 1
+        let offset = page > 1 ? (page - 1) * perPage : 0
+        const keyCached = `txs-conststats`
+        if (page === 1) {
+            // load from cached
+            let cache = await redisHelper.get(keyCached)
+            if (cache !== null) {
+                let r = JSON.parse(cache)
+                logger.info('load trade stats of constant from cache')
+                return res.json(r)
+            }
+        }
+
+        let total = await db.TradeStats.count({ type: 'CONST' }).exec()
+        if (total === 0) {
+            return res.json({
+                total: total,
+                perPage: perPage,
+                currentPage: page,
+                pages: 0,
+                items: []
+            })
+        }
+        
+        let pages = Math.ceil(total / perPage)
+        let items = await db.TradeStats.find({ type: 'CONST' })
+            .maxTimeMS(20000)
+            .sort({ volume: -1 })
+            .skip(offset)
+            .limit(perPage)
+            .lean()
+            .exec()
+
+        if (pages > 500) {
+            pages = 500
+        }
+
+        let data = {
+            total: total,
+            perPage: perPage,
+            currentPage: page,
+            pages: pages,
+            items: mapFromTradeStats(items)
+        }
+        
+        if (page === 1 && data.items.length > 0) {
+            const expỉreTime = 10
+            redisHelper.set(keyCached, JSON.stringify(data), expỉreTime)
+        }
+        return res.json(data)
+    } catch (e) {
+        console.log(e)
+        return res.status(500).json({ errors: { message: 'Something error!' } })
+    }
+})
+
 ChainTexController.get('/chaintex/tradestats', [
     check('limit').optional().isInt({ max: 100 }).withMessage('Limit is less than 101 items per page'),
     check('page').optional().isInt({ max: 500 }).withMessage('Require page is number'),
@@ -37,94 +104,115 @@ ChainTexController.get('/chaintex/tradestats', [
     check('fromDate').optional().isString().withMessage('require from date is yyyy-mm-dd'),
     check('toDate').optional().isString().withMessage('require to date is yyyy-mm-dd')
 ], async (req, res) => {
-let errors = validationResult(req)
-if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() })
-}
+    let errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
 
-let params = { sort: { volume: -1 }, query: {} }
-if (req.query.sort === 'txs') {
-    params.sort = { txs: -1 }
-} else {
-    params.sort = { volume: -1 }
-}
+    let params = { sort: { volume: -1 }, query: {} }
+    if (req.query.sort === 'txs') {
+        params.sort = { txs: -1 }
+    } else {
+        params.sort = { volume: -1 }
+    }
 
-try {
-    let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date()
-    let toDate = req.query.toDate ? new Date(req.query.toDate) : new Date()
-    // add 1 day for toDate
-    toDate = new Date(toDate.setDate(toDate.getDate() + 1))
+    try {
+        let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date()
+        let toDate = req.query.toDate ? new Date(req.query.toDate) : new Date()
+        // add 1 day for toDate
+        toDate = new Date(toDate.setDate(toDate.getDate() + 1))
 
-    let minValue = !isNaN(req.query.minValue) ? req.query.minValue : '0'
-    let perPage = !isNaN(req.query.limit) ? parseInt(req.query.limit) : 25
-    let page = !isNaN(req.query.page) ? parseInt(req.query.page) : 1
-    let offset = page > 1 ? (page - 1) * perPage : 0
-    let address = config.get('CHAINTEX_ADDR')
+        let minValue = !isNaN(req.query.minValue) ? req.query.minValue : '0'
+        let perPage = !isNaN(req.query.limit) ? parseInt(req.query.limit) : 25
+        let page = !isNaN(req.query.page) ? parseInt(req.query.page) : 1
+        let offset = page > 1 ? (page - 1) * perPage : 0
+        let address = config.get('CHAINTEX_ADDR')
+        const keyCached = `txs-tradestats-${address}`
+        if (page === 1) {
+            // load from cached
+            let cache = await redisHelper.get(keyCached)
+            if (cache !== null) {
+                let r = JSON.parse(cache)
+                logger.info('load trade stats of address %s from cache', address)
+                return res.json(r)
+            }
+        }
 
-    params.query = Object.assign({}, params.query, { isPending: false, to: address, realValue: { $gte: minValue }, timestamp: { $gte: fromDate, $lte: toDate } })
-    console.log(fromDate, toDate)
-    let grp = [
-        { $match: params.query },
-        { $group: {
-            _id: { from: '$from' }
-        } },
-        { $count: 'passing_scores' }
-    ]
+        params.query = Object.assign({}, params.query, { isPending: false, to: address, realValue: { $gte: minValue }, timestamp: { $gte: fromDate, $lte: toDate } })
+        console.log(fromDate, toDate)
+        let grp = [
+            { $match: params.query },
+            { $group: {
+                _id: { from: '$from' }
+            } },
+            { $count: 'passing_scores' }
+        ]
 
-    let all = await db.Tx.aggregate(grp).exec()
-    let total = all && all.length > 0 ? all[0].passing_scores : 0
+        let all = await db.Tx.aggregate(grp).exec()
+        let total = all && all.length > 0 ? all[0].passing_scores : 0
 
-    if (total === 0) {
-        return res.json({
+        if (total === 0) {
+            return res.json({
+                total: total,
+                perPage: perPage,
+                currentPage: page,
+                pages: 0,
+                items: []
+            })
+        }
+        
+        let pages = Math.ceil(total / perPage)
+        let avg = [
+            { $match: params.query },
+            { $group: {
+                _id: { from: '$from' },
+                volume: {
+                    $sum: {
+                        $toDouble : '$realValue'
+                    }
+                },
+                txs: { $sum: 1 }
+            } },
+            { $sort: params.sort },
+            { $limit: perPage },
+            { $skip: offset }
+        ]
+
+        let items = await db.Tx.aggregate(avg).exec()
+
+        if (pages > 500) {
+            pages = 500
+        }
+
+        let data = {
             total: total,
             perPage: perPage,
             currentPage: page,
-            pages: 0,
-            items: []
-        })
+            pages: pages,
+            items: mapFromGroup(items)
+        }
+        
+        if (page === 1 && data.items.length > 0) {
+            const expỉreTime = 10
+            redisHelper.set(keyCached, JSON.stringify(data), expỉreTime)
+        }
+        return res.json(data)
+    } catch (e) {
+        console.log(e)
+        logger.warn('cannot get list tx with query %s. Error', JSON.stringify(params.query), e)
+        return res.status(500).json({ errors: { message: 'Something error!' } })
     }
-    
-    let pages = Math.ceil(total / perPage)
-    let avg = [
-        { $match: params.query },
-        { $group: {
-            _id: { from: '$from' },
-            volume: {
-                $sum: {
-                    $toDouble : '$realValue'
-                }
-            },
-            txs: { $sum: 1 }
-        } },
-        { $sort: params.sort },
-        { $limit: perPage },
-        { $skip: offset }
-    ]
-
-    let items = await db.Tx.aggregate(avg).exec()
-
-    if (pages > 500) {
-        pages = 500
-    }
-
-    let data = {
-        total: total,
-        perPage: perPage,
-        currentPage: page,
-        pages: pages,
-        items: mapFromGroup(items)
-    }
-    
-    if (page === 1 && data.items.length > 0) {
-        redisHelper.set(`txs-tradestats-${address}`, JSON.stringify(data))
-    }
-    return res.json(data)
-} catch (e) {
-    console.log(e)
-    logger.warn('cannot get list tx with query %s. Error', JSON.stringify(params.query), e)
-    return res.status(500).json({ errors: { message: 'Something error!' } })
-}
 })
+
+const mapFromTradeStats = (items) => {
+    return items.map((item) => {
+        return {
+            from: item.from,
+            volume: item.volume,
+            txs: item.txs
+        }
+    })
+}
 
 const mapFromGroup = (items) => {
     return items.map((item) => {

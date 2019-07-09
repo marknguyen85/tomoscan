@@ -10,8 +10,9 @@
     "password": null,
     "prefix": "TomoScan"
   },
-  "CHAINTEX_ADDR": "0x00252a171ee0ea54bfcf326c8cf86fd970205df0",
-  "INIT_BLOCK_CRAWLER": 4669090,
+  "CHAINTEX_ADDR": "0x668ef5d8e81bc4a5755f425db5a368e03686d2cf",
+  "INIT_BLOCK_CRAWLER": 6337737,
+  "CONST_API": "https://www.myconstant.com/api/collateral-loan/report/tomo/?clientKey=adebfd11e3964072a00188ee2a831946&fromDate=2019-02-01&toDate=2019-08-01",
   "defaultCandidate": [
     {
       "name": "TomoChain01",

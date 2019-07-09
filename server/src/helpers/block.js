@@ -62,6 +62,10 @@ let BlockHelper = {
         delete _block['_id']
         delete _block['signers']
 
+        // custom delete field not neeed
+        delete _block['logsBloom']
+        delete _block['extraData']
+
         await db.Block.updateOne({ number: _block.number }, _block,
             { upsert: true, new: true })
 
@@ -161,6 +165,10 @@ let BlockHelper = {
 
             delete _block['_id']
             delete _block['signers']
+
+            // custom delete field not neeed
+            delete _block['logsBloom']
+            delete _block['extraData']
 
             block = await db.Block.findOneAndUpdate({ number: _block.number }, _block,
                 { upsert: true, new: true })

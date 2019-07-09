@@ -7,3 +7,4 @@ db/prod/*
 .eslintcache
 server/config/local.json
 .DS_Store
+data/*

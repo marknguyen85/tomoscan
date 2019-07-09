@@ -25,6 +25,9 @@ services:
       context: ./
       dockerfile: ./Dockerfile.crawler
     command: 'npm run crawl-dev'
+    volumes:
+      - ./server/src:/app/src
+      - ./server/config:/app/config
     tty: true
 
   mongo:

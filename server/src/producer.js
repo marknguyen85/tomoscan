@@ -29,11 +29,9 @@ const watch = async () => {
         let step = 100
         let setting = await db.Setting.findOne({ meta_key: 'min_block_crawl' })
         let newJobSetting = await db.Setting.findOne({ meta_key: 'push_new_job' })
-        let initBlockCrawl = config.get('INIT_BLOCK_CRAWLER');
+        let initBlockCrawl = config.get('INIT_BLOCK_CRAWLER')
         if (!initBlockCrawl) {
-            initBlockCrawl = parseInt(+initBlockCrawl);
-        } else {
-            initBlockCrawl = 0;
+            initBlockCrawl = 0
         }
 
         let web3 = await Web3Util.getWeb3()
@@ -90,6 +88,9 @@ const watch = async () => {
                     await setting.save()
                     newJobSetting = await db.Setting.findOne({ meta_key: 'push_new_job' })
                 }
+
+                // crawl data from CONST
+                q.create('TradeStats', null).priority('low').removeOnComplete(true).attempts(2).backoff({ delay: 10000, type: 'fixed' }).save()
             }
         }
     } catch (e) {
