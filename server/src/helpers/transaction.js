@@ -192,10 +192,10 @@ let TransactionHelper = {
                 tx.internalValue = internalCount[0].value
                 q.create('CountProcess', { data: JSON.stringify(internalCount) })
                     .priority('low').removeOnComplete(true)
-                    .attempts(5).backoff({ delay: 2000, type: 'fixed' }).save()
-                
+                    .attempts(5).backoff({ delay: 2000, type: 'fixed' })
+                    .save()
             }
-            tx.realValue = tx.value !== '0' ? tx.value : tx.internalValue
+            tx.realValue = tx.value !== '0' ? +tx.value : +tx.internalValue
 
             await db.Tx.updateOne({ hash: hash }, tx,
                 { upsert: true, new: true })
@@ -353,7 +353,7 @@ let TransactionHelper = {
         }
         delete tx['_id']
 
-        tx.realValue = tx.value !== '0' ? tx.value : tx.internalValue
+        tx.realValue = tx.value !== '0' ? +tx.value : +tx.internalValue
         return db.Tx.findOneAndUpdate({ hash: hash }, tx,
             { upsert: true, new: true })
     },

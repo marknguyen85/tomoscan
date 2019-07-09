@@ -142,18 +142,11 @@ ChainTexController.get('/chaintex/tradestats', [
         params.query = Object.assign({}, params.query,
             { isPending: false,
                 to: address,
-                tradeValue: { $gte: minValue },
+                realValue: { $gte: minValue },
                 timestamp: { $gte: fromDate, $lte: toDate }
             })
         console.log(fromDate, toDate)
         let grp = [
-            {
-                $addFields: {
-                    tradeValue: {
-                        $toDouble : '$realValue'
-                    }
-                }
-            },
             { $match: params.query },
             { $group: {
                 _id: { from: '$from' }
@@ -175,13 +168,6 @@ ChainTexController.get('/chaintex/tradestats', [
         }
         let pages = Math.ceil(total / perPage)
         let avg = [
-            {
-                $addFields: {
-                    tradeValue: {
-                        $toDouble : '$realValue'
-                    }
-                }
-            },
             { $match: params.query },
             { $group: {
                 _id: { from: '$from' },
