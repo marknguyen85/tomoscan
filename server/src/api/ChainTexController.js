@@ -4,6 +4,7 @@ const TransactionHelper = require('../helpers/transaction')
 const Web3Util = require('../helpers/web3')
 const config = require('config')
 const redisHelper = require('../helpers/redis')
+const BigNumber = require('bignumber.js')
 
 const contractAddress = require('../contracts/contractAddress')
 const accountName = require('../contracts/accountName')
@@ -123,7 +124,7 @@ ChainTexController.get('/chaintex/tradestats', [
         // add 1 day for toDate
         toDate = new Date(toDate.setDate(toDate.getDate() + 1))
 
-        let minValue = !isNaN(req.query.minValue) ? req.query.minValue : 0
+        let minValue = !isNaN(req.query.minValue) ? +req.query.minValue : 0
         let perPage = !isNaN(req.query.limit) ? parseInt(req.query.limit) : 25
         let page = !isNaN(req.query.page) ? parseInt(req.query.page) : 1
         let offset = page > 1 ? (page - 1) * perPage : 0
@@ -145,7 +146,7 @@ ChainTexController.get('/chaintex/tradestats', [
                 realValue: { $gte: minValue },
                 timestamp: { $gte: fromDate, $lte: toDate }
             })
-        console.log(fromDate, toDate)
+        console.log('+++++++++++++++++++++++++++++', params.query)
         let grp = [
             { $match: params.query },
             { $group: {
