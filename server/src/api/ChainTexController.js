@@ -123,7 +123,7 @@ ChainTexController.get('/chaintex/tradestats', [
         // add 1 day for toDate
         toDate = new Date(toDate.setDate(toDate.getDate() + 1))
 
-        let minValue = !isNaN(req.query.minValue) ? req.query.minValue : '0'
+        let minValue = !isNaN(req.query.minValue) ? `${req.query.minValue}` : '0'
         let perPage = !isNaN(req.query.limit) ? parseInt(req.query.limit) : 25
         let page = !isNaN(req.query.page) ? parseInt(req.query.page) : 1
         let offset = page > 1 ? (page - 1) * perPage : 0
