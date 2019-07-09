@@ -110,7 +110,8 @@ ChainTexController.get('/chaintex/tradestats', [
     }
 
     let params = { sort: { volume: -1 }, query: {} }
-    if (req.query.sort === 'txs') {
+    const viewActive = req.query.sort
+    if (viewActive === 'txs') {
         params.sort = { txs: -1 }
     } else {
         params.sort = { volume: -1 }
@@ -127,7 +128,7 @@ ChainTexController.get('/chaintex/tradestats', [
         let page = !isNaN(req.query.page) ? parseInt(req.query.page) : 1
         let offset = page > 1 ? (page - 1) * perPage : 0
         let address = config.get('CHAINTEX_ADDR')
-        const keyCached = `txs-tradestats-${address}`
+        const keyCached = `txs-tradestats-${address}-${viewActive}-${perPage}`
         if (page === 1) {
             // load from cached
             let cache = await redisHelper.get(keyCached)
@@ -224,9 +225,9 @@ const mapFromGroup = (items) => {
     })
 }
 ChainTexController.get('/chaintex/latestTrade', [
-        check('limit').optional().isInt({ max: 100 }).withMessage('Limit is less than 101 items per page'),
-        check('page').optional().isInt({ max: 500 }).withMessage('Require page is number')
-    ], async (req, res) => {
+    check('limit').optional().isInt({ max: 100 }).withMessage('Limit is less than 101 items per page'),
+    check('page').optional().isInt({ max: 500 }).withMessage('Require page is number')
+], async (req, res) => {
     let errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() })
