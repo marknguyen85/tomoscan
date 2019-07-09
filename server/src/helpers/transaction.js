@@ -8,6 +8,7 @@ const BlockHelper = require('./block')
 const axios = require('axios')
 const config = require('config')
 const redisHelper = require('./redis')
+const utils = require('./utils')
 
 let sleep = (time) => new Promise((resolve) => setTimeout(resolve, time))
 let TransactionHelper = {
@@ -182,24 +183,24 @@ let TransactionHelper = {
             let internalTx = await TransactionHelper.getInternalTx(tx)
             tx.i_tx = internalTx.length
             let internalCount = []
+            console.log(internalTx)
             for (let i = 0; i < internalTx.length; i++) {
                 let item = internalTx[i]
                 internalCount.push({ hash: item.from, countType: 'internalTx' })
                 internalCount.push({ hash: item.to, countType: 'internalTx' })
             }
-            if (internalCount.length > 0) {
+            if (internalTx.length > 0) {
                 // get value from internal tx
-                tx.internalValue = internalCount[0].value
+                tx.internalValue = internalTx[0].value
                 q.create('CountProcess', { data: JSON.stringify(internalCount) })
                     .priority('low').removeOnComplete(true)
                     .attempts(5).backoff({ delay: 2000, type: 'fixed' })
                     .save()
             }
 
-            if (!isNaN(tx.value) && tx.value !== '0') {
-                tx.realValue = +tx.value
-            } else {
-                tx.realValue = +tx.internalValue
+            tx.realValue = await utils.toNumber(tx.value)
+            if (tx.realValue === 0) {
+                tx.realValue = await utils.toNumber(tx.internalValue)
             }
 
             await db.Tx.updateOne({ hash: hash }, tx,
@@ -353,21 +354,20 @@ let TransactionHelper = {
         // Internal transaction
         let internalTx = await TransactionHelper.getInternalTx(tx)
         tx.i_tx = internalTx.length
+
         if (internalTx.length > 0) {
             tx.internalValue = internalTx[0].value
         }
         delete tx['_id']
-
-        if (!isNaN(tx.value) && tx.value !== '0') {
-            tx.realValue = +tx.value
-        } else {
-            tx.realValue = +tx.internalValue
+        
+        tx.realValue = await utils.toNumber(tx.value)
+        if (tx.realValue === 0) {
+            tx.realValue = await utils.toNumber(tx.internalValue)
         }
         
         return db.Tx.findOneAndUpdate({ hash: hash }, tx,
             { upsert: true, new: true })
     },
-
     getTransactionReceipt: async (hash, recall = false) => {
         let web3 = await Web3Util.getWeb3()
         if (recall) {
@@ -413,6 +413,14 @@ let TransactionHelper = {
                 let calls = res.calls
                 internalTx = await TransactionHelper.listInternal(
                     calls, transaction.hash, transaction.blockNumber, transaction.timestamp)
+            }
+        } else {
+            logger.warn('getInternalTx got error when call rpc: %s', result.error.message)
+            // call from tomoscan online
+            const url = config.get('TOMO_SCAN_TX_DETAIL') + transaction.hash
+            const responseApi = await axios.get(url)
+            if (responseApi && responseApi.data) {
+                internalTx = responseApi.data.internals
             }
         }
         if (internalTx.length > 0) {

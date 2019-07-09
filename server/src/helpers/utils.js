@@ -202,6 +202,16 @@ const utils = {
                 Math.pow(radix, parts[1].length)
         }
         return parseInt(parts[0], radix)
+    },
+    toNumber: async (str) => {
+        try {
+            if (!isNaN(str) && str !== '') {
+                return Number(str)
+            }
+            return 0
+        } catch (error) {
+            return 0
+        }
     }
 
 }

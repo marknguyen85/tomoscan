@@ -270,7 +270,6 @@ TxController.get(['/txs/:slug', '/tx/:slug'], [
         if (!tx) {
             return res.status(404).json({ errors: { message: 'Transaction is not found!' } })
         }
-        console.log(tx.internals)
         tx.from_model = await db.Account.findOne({ hash: tx.from.toLowerCase() })
         let toModel
         if (tx.to) {
@@ -278,7 +277,7 @@ TxController.get(['/txs/:slug', '/tx/:slug'], [
         } else {
             toModel = await db.Account.findOne({ hash: tx.contractAddress.toLowerCase() })
         }
-        tx.to_model = toModel 
+        tx.to_model = toModel
 
         let trc20Txs = await db.TokenTx.find({ transactionHash: tx.hash }).maxTimeMS(20000)
         trc20Txs = await TokenTransactionHelper.formatTokenTransaction(trc20Txs)

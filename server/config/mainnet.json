@@ -46,7 +46,8 @@
     }
   ],
 
-  "WEB3_URI": "https://rpc.tomochain.com",
+  "WEB3_URI": "https://rpc.tomochain.com/",
+  "TOMO_SCAN_TX_DETAIL": "https://scan.tomochain.com/api/txs/",
   "WEB3_WS_URI": "wss://rpc.tomochain.com/ws",
   "DEBUG_QUERY": false,
 
