@@ -19,6 +19,7 @@ services:
       - ./server/src:/app/src
       - ./server/config:/app/config
     tty: true
+    restart: always
 
   crawler:
     build:
@@ -29,6 +30,7 @@ services:
       - ./server/src:/app/src
       - ./server/config:/app/config
     tty: true
+    restart: always
 
   mongo:
     image: mongo
@@ -40,7 +42,9 @@ services:
     command:
       - "-f"
       - "/etc/mongo/mongod.conf"
+    restart: always
   redis:
     image: redis
     ports:
       - "6379:6379"
+    restart: always
