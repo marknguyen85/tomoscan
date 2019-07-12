@@ -11,10 +11,10 @@ consumer.task = async function (job, done) {
     let timestamp = job.data.timestamp
 
     let map = txs.map(async function (hash) {
-        logger.info('Process Transaction: %s', hash)
         try {
             await TransactionHelper.crawlTransaction(hash, timestamp)
         } catch (e) {
+            logger.error(e)
             return done(e)
         }
     })

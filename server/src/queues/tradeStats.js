@@ -8,7 +8,7 @@ consumer.name = 'TradeStats'
 consumer.processNumber = 1
 consumer.task = async function (job, done) {
     try {
-        logger.info('Process crawl trade stats: ')
+        logger.info('*************************************Process crawl trade stats')
         await TradeStatsHelper.crawlTradeStats()
     } catch (e) {
         logger.warn('Process crawl trade stats error: ', e)

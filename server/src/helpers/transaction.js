@@ -62,6 +62,7 @@ let TransactionHelper = {
                 return false
             }
 
+            logger.info('Process Transaction: %s', hash)
             let listHash = []
             if (tx.from !== null) {
                 tx.from = tx.from.toLowerCase()

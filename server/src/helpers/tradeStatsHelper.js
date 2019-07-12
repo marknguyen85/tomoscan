@@ -18,10 +18,10 @@ let TradeStatsHelper = {
         })
 
         // delete old data
-        logger.info('crawlTradeStats delete old data from db')
+        logger.info('*************************************crawlTradeStats delete old data from db')
         await db.TradeStats.deleteMany({ type: /CONST/ })
         // insert new data
-        logger.info('crawlTradeStats insert new data from CONST API')
+        logger.info('*************************************crawlTradeStats insert new data from CONST API')
         await db.TradeStats.insertMany(items)
 
         return items
