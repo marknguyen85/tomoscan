@@ -12,7 +12,7 @@ const { check, validationResult } = require('express-validator/check')
 
 const ChainTexController = Router()
 
-ChainTexController.get('/chaintex/volAll', [
+ChainTexController.get('/chaintex/volume', [
     check('fromDate').optional().isString().withMessage('require from date is yyyy-mm-dd'),
     check('toDate').optional().isString().withMessage('require to date is yyyy-mm-dd')
 ], async (req, res) => {
@@ -62,6 +62,8 @@ ChainTexController.get('/chaintex/volAll', [
 
         let data = {
             volume,
+            from: fromDate,
+            to: toDate,
             time: new Date()
         }
         if (volume > 0) {
