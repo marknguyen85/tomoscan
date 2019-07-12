@@ -32,6 +32,17 @@ services:
     tty: true
     restart: always
 
+  crawler2:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile.crawler
+    command: 'npm run crawl'
+    volumes:
+      - ./server/src:/app/src
+      - ./server/config:/app/config
+    tty: true
+    restart: always
+
   mongo:
     image: mongo
     ports:
