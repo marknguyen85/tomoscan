@@ -6,7 +6,6 @@ const config = require('config')
 const redisHelper = require('../helpers/redis')
 const BigNumber = require('bignumber.js')
 
-const contractAddress = require('../contracts/contractAddress')
 const accountName = require('../contracts/accountName')
 const logger = require('../helpers/logger')
 const { check, validationResult } = require('express-validator/check')
@@ -14,20 +13,62 @@ const { check, validationResult } = require('express-validator/check')
 const ChainTexController = Router()
 
 ChainTexController.get('/chaintex/vol24h', async (req, res) => {
-    const web3 = await Web3Util.getWeb3()
-    let foundationBalance = await web3.eth.getBalance(contractAddress.TomoFoundation)
-    let teamBalance = await web3.eth.getBalance(contractAddress.TomoTeam)
-    let lastBlock = await web3.eth.getBlockNumber()
-    let totalEpoch = Math.ceil(lastBlock / config.get('BLOCK_PER_EPOCH'))
-    let totalReward = new BigNumber((totalEpoch - 1) * config.get('REWARD'))
-    let circulatingSupply = new BigNumber(83 * 10 ** 6)
-    circulatingSupply = circulatingSupply.multipliedBy(10 ** 18)
-        .plus(totalReward.multipliedBy(10 ** 18)).minus(foundationBalance).minus(teamBalance)
+    let errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() })
+    }
 
-    let circulatingNumber = circulatingSupply.dividedBy(10 ** 18)
+    let params = { query: {} }
+    try {
+        let toDate = new Date()
+        let fromDate = new Date(toDate.setDate(toDate.getDate() - 1))
+        let address = config.get('CHAINTEX_ADDR')
+        const keyCached = `vol24h-${address}`
+        // load from cached
+        let cache = await redisHelper.get(keyCached)
+        if (cache !== null) {
+            let r = JSON.parse(cache)
+            logger.info('load trade stats of address %s from cache', address)
+            return res.json(r)
+        }
 
-    let maxSupply = 100 * 10 ** 6
-    return res.json({ circulatingSupply: circulatingNumber.toNumber(), maxSupply: maxSupply })
+        params.query = Object.assign({}, params.query,
+            { isPending: false,
+                to: address,
+                timestamp: { $gte: fromDate, $lte: toDate }
+            })
+
+        let avg = [
+            { $match: params.query },
+            { $group: {
+                _id: { address: '$to' },
+                volume: {
+                    $sum: '$realValue'
+                }
+            } }
+        ]
+
+        let items = await db.Tx.aggregate(avg).exec()
+
+        let volume = 0
+        if (items && items.length > 0) {
+            volume = new BigNumber(items[0].volume).dividedBy(10 ** 18).toNumber()
+        }
+
+        let data = {
+            volume,
+            time: toDate
+        }
+        if (volume > 0) {
+            const expỉreTime = 5 * 60// 5 minutes
+            redisHelper.set(keyCached, JSON.stringify(data), expỉreTime)
+        }
+
+        return res.json(data)
+    } catch (e) {
+        logger.warn('cannot get list tx with query %s. Error', JSON.stringify(params.query), e)
+        return res.status(500).json({ errors: { message: 'Something error!' } })
+    }
 })
 
 ChainTexController.get('/chaintex/conststats', [
