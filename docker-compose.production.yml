@@ -1,14 +1,6 @@
 version: '3'
 
 services:
-  client:
-    build:
-      context: ./
-      dockerfile: ./Dockerfile.client
-    ports:
-      - "3000:3000"
-    tty: true
-
   server:
     build:
       context: ./
@@ -31,37 +23,6 @@ services:
       - ./server/config:/app/config
     tty: true
     restart: always
-
-  crawler2:
-    build:
-      context: ./
-      dockerfile: ./Dockerfile.crawler
-    command: 'npm run crawl'
-    volumes:
-      - ./server/src:/app/src
-      - ./server/config:/app/config
-    tty: true
-    restart: always
-
-  crawler3:
-    build:
-      context: ./
-      dockerfile: ./Dockerfile.crawler
-    command: 'npm run crawl'
-    volumes:
-      - ./server/src:/app/src
-      - ./server/config:/app/config
-    tty: true
-    
-  crawler4:
-    build:
-      context: ./
-      dockerfile: ./Dockerfile.crawler
-    command: 'npm run crawl'
-    volumes:
-      - ./server/src:/app/src
-      - ./server/config:/app/config
-    tty: true
 
   mongo:
     image: mongo
