@@ -23,7 +23,7 @@ ChainTexController.get('/chaintex/volAll', [
 
     let params = { query: {} }
     try {
-        let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date()
+        let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2019-01-01')
         let toDate = req.query.toDate ? new Date(req.query.toDate) : new Date()
         // add 1 day for toDate
         toDate = new Date(toDate.setDate(toDate.getDate() + 1))
@@ -171,7 +171,7 @@ ChainTexController.get('/chaintex/conststats', [
                 items: []
             })
         }
-        
+
         let pages = Math.ceil(total / perPage)
         let items = await db.TradeStats.find({ type: 'CONST' })
             .maxTimeMS(20000)
@@ -192,7 +192,7 @@ ChainTexController.get('/chaintex/conststats', [
             pages: pages,
             items: mapFromTradeStats(items)
         }
-        
+
         if (page === 1 && data.items.length > 0) {
             const expỉreTime = 10
             redisHelper.set(keyCached, JSON.stringify(data), expỉreTime)
@@ -304,7 +304,7 @@ ChainTexController.get('/chaintex/tradestats', [
             pages: pages,
             items: mapFromGroup(items)
         }
-        
+
         if (page === 1 && data.items.length > 0) {
             const expỉreTime = 10
             redisHelper.set(keyCached, JSON.stringify(data), expỉreTime)
@@ -523,7 +523,7 @@ var mapData = function (data) {
                 accountName: toModel.accountName
             }
         }
-    })   
+    })
     return {
         total: data.total,
         perPage: data.perPage,
