@@ -52,7 +52,7 @@ services:
       - ./server/src:/app/src
       - ./server/config:/app/config
     tty: true
-
+    
   crawler4:
     build:
       context: ./
