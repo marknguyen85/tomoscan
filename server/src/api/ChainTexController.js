@@ -85,12 +85,15 @@ ChainTexController.get('/chaintex/volume24h', async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() })
     }
-
     let params = { query: {} }
     try {
         const now = new Date()
-        let fromDate = new Date(`${now.getFullYear()}-${now.getMonth()}-${now.getDate()}T00:00:01.000Z`)
-        let toDate = new Date(`${now.getFullYear()}-${now.getMonth()}-${now.getDate()}T59:59:59.000Z`)
+        const year = now.getFullYear()
+        let month = now.getMonth() + 1
+        let date = now.getDate()
+        month = month < 10 ? '0' + month : month
+        let fromDate = new Date(`${year}-${month}-${date}T00:00:01.000Z`)
+        let toDate = new Date(`${year}-${month}-${date}T59:59:59.000Z`)
         let address = config.get('CHAINTEX_ADDR')
         const keyCached = `vol24h-${address}`
         // load from cached
