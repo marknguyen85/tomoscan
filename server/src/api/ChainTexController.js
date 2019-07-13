@@ -23,10 +23,12 @@ ChainTexController.get('/chaintex/volume', [
 
     let params = { query: {} }
     try {
-        let fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2019-01-01')
-        let toDate = req.query.toDate ? new Date(req.query.toDate) : new Date()
-        // add 1 day for toDate
-        toDate = new Date(toDate.setDate(toDate.getDate() + 1))
+        let fromDate = req.query.fromDate
+            ? new Date(`${req.query.fromDate}T00:00:01.000Z`)
+            : new Date('2019-01-01T00:00:01.000Z')
+        let toDate = req.query.toDate
+            ? new Date(`${req.query.toDate}T23:59:59.000Z`)
+            : new Date()
         let address = config.get('CHAINTEX_ADDR')
         const keyCached = `vol-${address}-${req.query.fromDate}-${req.query.toDate}`
         // load from cached
@@ -86,8 +88,9 @@ ChainTexController.get('/chaintex/volume24h', async (req, res) => {
 
     let params = { query: {} }
     try {
-        let toDate = new Date()
-        let fromDate = new Date(toDate.setDate(toDate.getDate() - 1))
+        const now = new Date()
+        let fromDate = new Date(`${now.getFullYear()}-${now.getMonth()}-${now.getDate()}T00:00:01.000Z`)
+        let toDate = new Date(`${now.getFullYear()}-${now.getMonth()}-${now.getDate()}T59:59:59.000Z`)
         let address = config.get('CHAINTEX_ADDR')
         const keyCached = `vol24h-${address}`
         // load from cached
