@@ -100,7 +100,7 @@ ChainTexController.get('/chaintex/volume24h', async (req, res) => {
         let cache = await redisHelper.get(keyCached)
         if (cache !== null) {
             let r = JSON.parse(cache)
-            logger.info('load trade stats of address %s from cache', address)
+            logger.info('load trade stats 24h of address %s from cache', address)
             return res.json(r)
         }
 
