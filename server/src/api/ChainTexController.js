@@ -85,7 +85,6 @@ ChainTexController.get('/chaintex/volume24h', async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() })
     }
-
     let params = { query: {} }
     try {
         const now = new Date()
