@@ -67,7 +67,7 @@ ChainTexController.get('/chaintex/volume', [
             time: new Date()
         }
         if (volume > 0) {
-            const expỉreTime = 5 * 60// 5 minutes
+            const expỉreTime = 1 * 60// 1 minutes
             redisHelper.set(keyCached, JSON.stringify(data), expỉreTime)
         }
 
@@ -78,7 +78,7 @@ ChainTexController.get('/chaintex/volume', [
     }
 })
 
-ChainTexController.get('/chaintex/vol24h', async (req, res) => {
+ChainTexController.get('/chaintex/volume24h', async (req, res) => {
     let errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() })
@@ -128,7 +128,7 @@ ChainTexController.get('/chaintex/vol24h', async (req, res) => {
             time: new Date()
         }
         if (volume > 0) {
-            const expỉreTime = 5 * 60// 5 minutes
+            const expỉreTime = 30// 30 seconds
             redisHelper.set(keyCached, JSON.stringify(data), expỉreTime)
         }
 
