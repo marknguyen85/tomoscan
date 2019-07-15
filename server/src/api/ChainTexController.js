@@ -243,6 +243,8 @@ ChainTexController.get('/chaintex/tradestats', [
         let perPage = !isNaN(req.query.limit) ? parseInt(req.query.limit) : 25
         let page = !isNaN(req.query.page) ? parseInt(req.query.page) : 1
         let offset = page > 1 ? (page - 1) * perPage : 0
+        let limit = offset + perPage
+
         let address = config.get('CHAINTEX_ADDR')
         const keyCached = `txs-tradestats-${address}-${viewActive}-${perPage}`
         if (page === 1) {
@@ -261,7 +263,6 @@ ChainTexController.get('/chaintex/tradestats', [
                 realValue: { $gte: minValue },
                 timestamp: { $gte: fromDate, $lte: toDate }
             })
-        console.log('+++++++++++++++++++++++++++++', params.query)
         let grp = [
             { $match: params.query },
             { $group: {
@@ -295,7 +296,7 @@ ChainTexController.get('/chaintex/tradestats', [
                 txs: { $sum: 1 }
             } },
             { $sort: params.sort },
-            { $limit: perPage },
+            { $limit: limit },
             { $skip: offset }
         ]
 
