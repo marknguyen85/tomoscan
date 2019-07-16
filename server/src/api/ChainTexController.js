@@ -118,7 +118,7 @@ ChainTexController.get('/chaintex/volume24h', async (req, res) => {
         fromDate = new Date(fromDate.setDate(fromDate.getDate() - 1))
         let address = config.get('CHAINTEX_ADDR')
         const keyCached = `vol24h-${address}`
-        // load from cached
+        // load from cached redis
         let cache = await redisHelper.get(keyCached)
         if (cache !== null) {
             let r = JSON.parse(cache)
