@@ -12,6 +12,32 @@ const { check, validationResult } = require('express-validator/check')
 
 const ChainTexController = Router()
 
+ChainTexController.get('/chaintex/blocklatest', async (req, res) => {
+    try {
+        let items = await db.Block.find().sort({ number: -1 }).limit(1)
+        let data = {
+            items,
+            time: new Date()
+        }
+        return res.json(data)
+    } catch (e) {
+        return res.status(500).json({ errors: { message: 'Something error!' } })
+    }
+})
+
+ChainTexController.get('/chaintex/txlatest', async (req, res) => {
+    try {
+        let items = await db.Tx.find().sort({ blockNumber: -1 }).limit(1)
+        let data = {
+            items,
+            time: new Date()
+        }
+        return res.json(data)
+    } catch (e) {
+        return res.status(500).json({ errors: { message: 'Something error!' } })
+    }
+})
+
 ChainTexController.get('/chaintex/volume', [
     check('fromDate').optional().isString().withMessage('require from date is yyyy-mm-dd'),
     check('toDate').optional().isString().withMessage('require to date is yyyy-mm-dd')
