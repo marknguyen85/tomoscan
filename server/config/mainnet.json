@@ -48,6 +48,8 @@
 
   "WEB3_URI": "https://rpc.tomochain.com/",
   "TOMO_SCAN_TX_DETAIL": "https://scan.tomochain.com/api/txs/",
+  "TOMO_SCAN_TXES_SYNC": "https://scan.tomochain.com/api/txs/",
+  "TOMO_SCAN_TXES_SYNC_RECORDS": 100,
   "WEB3_WS_URI": "wss://rpc.tomochain.com/ws",
   "DEBUG_QUERY": false,
 
