@@ -36,7 +36,9 @@ fs.readdirSync(path.join(__dirname, 'queues'))
     })
     .forEach(function (file) {
         let consumer = require(path.join(__dirname, 'queues', file))
-        q.process(consumer.name, consumer.processNumber, consumer.task)
+        if (consumer.enabled) {
+            q.process(consumer.name, consumer.processNumber, consumer.task)
+        }
     })
 
 module.exports = q
