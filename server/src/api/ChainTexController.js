@@ -268,7 +268,7 @@ ChainTexController.get('/chaintex/tradestats', [
         let limit = offset + perPage
 
         let address = config.get('CHAINTEX_ADDR')
-        const keyCached = `txs-tradestats-${address}-${viewActive}-${perPage}`
+        const keyCached = `txs-tradestats-${address}-${viewActive}-${perPage}-${req.query.fromDate}-${req.query.toDate}`
         if (page === 1) {
             // load from cached
             let cache = await redisHelper.get(keyCached)
