@@ -12,7 +12,7 @@
   },
   "CHAINTEX_ADDR": "0x668ef5d8e81bc4a5755f425db5a368e03686d2cf",
   "INIT_BLOCK_CRAWLER": 7623892,
-  "CONST_API": "https://www.myconstant.com/api/collateral-loan/report/tomo/?clientKey=adebfd11e3964072a00188ee2a831946&fromDate=2019-07-30&toDate=2019-08-06",
+  "CONST_API": "https://www.myconstant.com/api/collateral-loan/report/tomo/?clientKey=adebfd11e3964072a00188ee2a831946&fromDate=2019-07-30&toDate=2019-08-05",
   "defaultCandidate": [
     {
       "name": "TomoChain01",
