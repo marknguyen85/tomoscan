@@ -12,7 +12,7 @@
   },
   "CHAINTEX_ADDR": "0x00252a171ee0ea54bfcf326c8cf86fd970205df0",
   "INIT_BLOCK_CRAWLER": 6337737,
-  "CONST_API": "https://www.myconstant.com/api/collateral-loan/report/tomo/?clientKey=adebfd11e3964072a00188ee2a831946&fromDate=2019-02-01&toDate=2019-08-01",
+  "CONST_API": "https://www.myconstant.com/api/collateral-loan/report/tomo/?clientKey=adebfd11e3964072a00188ee2a831946&fromDate=2019-07-30&toDate=2019-08-06",
   "defaultCandidate": [
     {
       "name": "sun",
