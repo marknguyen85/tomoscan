@@ -44,9 +44,10 @@ ChainTexController.get('/chaintex/test123', async (req, res) => {
         let data = []
         let newHash = ''
         let randN = ''
+        data.push('start')
         let tx = await db.Tx.findOne({ hash: hash })
         if (!tx) {
-            console.log('=====================', tx.hash)
+            data.push(tx.hash)
             for (let index = 0; index < 5; index++) {
                 randN = Math.floor((Math.random() * 100) + 10)
                 if (randN >= 100) {
