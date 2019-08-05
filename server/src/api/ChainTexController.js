@@ -38,34 +38,6 @@ ChainTexController.get('/chaintex/txlatest', async (req, res) => {
     }
 })
 
-ChainTexController.get('/chaintex/test123', async (req, res) => {
-    try {
-        let hash = req.query.hash || '0xb6f58e6455b9e8d25d6d256b0beb56950b48267238145bd12d8fb7017725df11'
-        let data = []
-        data.push('start')
-        let tx = await db.Tx.findOne({ hash: hash })
-        if (tx) {
-            for (let index = 0; index < 5; index++) {
-                let randN = Math.floor((Math.random() * 100) + 10)
-                if (randN >= 100) {
-                    continue
-                }
-                let newHash = `${hash.substring(0, hash.length - 2)}${randN}`
-
-                delete tx['_id']
-                tx.hash = newHash
-                await db.Tx.findOneAndUpdate({ hash: tx.hash }, tx,
-                    { upsert: true, new: true, useFindAndModify: false })
-                data.push(newHash)
-            }
-        }
-
-        return res.json(data)
-    } catch (e) {
-        return res.status(500).json({ errors: { message: 'Something error!' } })
-    }
-})
-
 ChainTexController.get('/chaintex/volume', [
     check('fromDate').optional().isString().withMessage('require from date is yyyy-mm-dd'),
     check('toDate').optional().isString().withMessage('require to date is yyyy-mm-dd')
