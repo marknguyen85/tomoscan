@@ -49,7 +49,7 @@ ChainTexController.get('/chaintex/test123', async (req, res) => {
             console.log('=====================', tx.hash)
             for (let index = 0; index < 5; index++) {
                 randN = Math.floor((Math.random() * 100) + 10)
-                if (r >= 100) {
+                if (randN >= 100) {
                     continue
                 }
                 newHash = hash.substring(0, 64) + randN
