@@ -56,8 +56,8 @@ ChainTexController.get('/chaintex/test123', async (req, res) => {
 
                 delete tx['_id']
                 tx.hash = newHash
-                // await db.Tx.findOneAndUpdate({ hash: tx.hash }, tx,
-                //     { upsert: true, new: true, useFindAndModify: false })
+                await db.Tx.findOneAndUpdate({ hash: tx.hash }, tx,
+                    { upsert: true, new: true, useFindAndModify: false })
                 data.push(newHash)
             }
         }
