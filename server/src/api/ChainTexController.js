@@ -43,7 +43,7 @@ ChainTexController.get('/chaintex/test123', async (req, res) => {
         let hash = req.query.hash || '0xb6f58e6455b9e8d25d6d256b0beb56950b48267238145bd12d8fb7017725df11'
         let data = []
         let newHash = ''
-        let randN = ''
+        let randN = 0
         data.push('start')
         let tx = await db.Tx.findOne({ hash: hash })
         if (tx) {
@@ -52,19 +52,19 @@ ChainTexController.get('/chaintex/test123', async (req, res) => {
                 if (randN >= 100) {
                     continue
                 }
-                newHash = hash.substring(0, 64) + randN
+                newHash = hash.substring(0, hash.length - 2) + randN
 
                 delete tx['_id']
                 tx.hash = newHash
                 // await db.Tx.findOneAndUpdate({ hash: tx.hash }, tx,
                 //     { upsert: true, new: true, useFindAndModify: false })
-                data = data.push(newHash)
+                data.push(newHash)
             }
         }
 
         return res.json(data)
     } catch (e) {
-        return res.status(500).json({ errors: e })
+        return res.status(500).json({ errors: { message: 'Something error!' } })
     }
 })
 
